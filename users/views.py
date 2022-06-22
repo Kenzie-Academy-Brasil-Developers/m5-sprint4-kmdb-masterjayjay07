@@ -19,6 +19,23 @@ class UserView(APIView):
         except KeyError:
             return Response({"email": ["email already exists"]}, status=status.HTTP_400_BAD_REQUEST)
 
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
+
+
+
+class UserViewDetail(APIView):
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response({"message": "User not found."},status=status.HTTP_404_NOT_FOUND)   
+
+
 
 class UserLoginView(APIView):
     def post(self, request):
@@ -36,4 +53,4 @@ class UserLoginView(APIView):
             return Response({"token": token.key}, status=status.HTTP_200_OK)
         return Response(
             {"detail": "invalid email or password"}, status.HTTP_401_UNAUTHORIZED
-        )
+        )    

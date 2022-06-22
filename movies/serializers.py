@@ -22,3 +22,9 @@ class MovieSerializer(serializers.Serializer):
         movie = Movie.objects.create(**validated_data)
         movie.genres.set(genres)
         return movie
+
+    def update(self, instance:Movie, validated_data:dict):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)    
+        instance.save()
+        return instance       

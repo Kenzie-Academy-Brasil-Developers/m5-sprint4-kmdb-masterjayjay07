@@ -3,10 +3,16 @@ from users.serializers import UserSerializer, UserLoginSerializer
 from users.models import User
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
+from users.permissions import MyCustomPermission
 
 # Create your views here.
 
 class UserView(APIView):
+    
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [MyCustomPermission]
+
     def post(self, request):
         serializer = UserSerializer(data=request.data)
 
@@ -18,8 +24,10 @@ class UserView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except KeyError:
             return Response({"email": ["email already exists"]}, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
+    
+    
+    def get(self, request):    
+        # apenas admin
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK) 
@@ -27,6 +35,9 @@ class UserView(APIView):
 
 
 class UserViewDetail(APIView):
+    # apenas admin
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [MyCustomPermission]
     def get(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)

@@ -5,18 +5,20 @@ from movies.serializers import MovieSerializer
 from movies.models import Movie
 from rest_framework.authentication import TokenAuthentication
 from movies.permissions import MyCustomPermission
+from kmdb.pagination import CustomPagination
 
 # Create your views here.
 
-class MovieView(APIView):
+class MovieView(APIView, CustomPagination):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [MyCustomPermission]
 
     def get(self, request):
         movies = Movie.objects.all()
-        serializer = MovieSerializer(movies, many=True)   
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        page = self.paginate_queryset(movies, request, view=self)
+        serializer = MovieSerializer(page, many=True)   
+        return self.get_paginated_response(serializer.data)
 
 
    

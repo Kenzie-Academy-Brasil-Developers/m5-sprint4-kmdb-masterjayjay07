@@ -5,10 +5,11 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 from users.permissions import MyCustomPermission
+from kmdb.pagination import CustomPagination
 
 # Create your views here.
 
-class UserView(APIView):
+class UserView(APIView, CustomPagination):
     
     authentication_classes = [TokenAuthentication]
     permission_classes = [MyCustomPermission]
@@ -29,8 +30,9 @@ class UserView(APIView):
     def get(self, request):    
         # apenas admin
         users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK) 
+        page = self.paginate_queryset(users, request, view=self)
+        serializer = UserSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data) 
 
 
 

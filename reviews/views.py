@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView, Response
+from kmdb.pagination import CustomPagination
 from reviews.models import Review
 from reviews.serializers import ReviewSerializer
 from movies.models import Movie
@@ -10,11 +11,12 @@ from reviews.permissions import MyCustomPermission,OwnerPermission
 from users.models import User
 
 # Create your views here.
-class ReviewView(APIView):
+class ReviewView(APIView, CustomPagination):
     def get(self, request):
         reviews = Review.objects.all()
-        serializer = ReviewSerializer(reviews, many=True)
-        return Response(serializer.data)
+        page = self.paginate_queryset(reviews, request, view=self)
+        serializer = ReviewSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 
@@ -32,7 +34,7 @@ class ReviewDetailView(APIView):
 
 
 
-class ReviewMovieView(APIView):
+class ReviewMovieView(APIView, CustomPagination):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [MyCustomPermission]
@@ -40,8 +42,9 @@ class ReviewMovieView(APIView):
     def get(self, request, movie_id):
         get_object_or_404(Movie, pk=movie_id) 
         reviews = Review.objects.filter(movie=movie_id)
-        serializer = ReviewSerializer(reviews, many=True)
-        return Response(serializer.data)
+        page = self.paginate_queryset(reviews, request, view=self)
+        serializer = ReviewSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     def post(self, request, movie_id):
         get_object_or_404(Movie, pk=movie_id)        

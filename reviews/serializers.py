@@ -14,14 +14,14 @@ class ReviewSerializer(serializers.ModelSerializer):
     critic = CriticSerializer(read_only=True)
     class Meta:
         model = Review
-        fields = ["id", "stars", "review", "spoilers", "movie", "critic", "recomendation"]
+        fields = ["id", "stars", "review", "spoilers", "movie_id", "critic", "recomendation"]
         
 
     def create(self, validated_data:dict):
         critic = validated_data.pop("critic")
-        movie = validated_data.pop("movie")
+        movie = validated_data.pop("movie_id")
         actual_movie = Movie.objects.get(pk=movie)
-        review = Review.objects.create(**validated_data, critic=critic, movie=actual_movie)
+        review = Review.objects.create(**validated_data, critic=critic, movie_id=actual_movie)
         review.recomendation = review.get_recomendation_display()
         return review
     

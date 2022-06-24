@@ -41,7 +41,7 @@ class ReviewMovieView(APIView, CustomPagination):
 
     def get(self, request, movie_id):
         get_object_or_404(Movie, pk=movie_id) 
-        reviews = Review.objects.filter(movie=movie_id)
+        reviews = Review.objects.filter(movie_id=movie_id)
         page = self.paginate_queryset(reviews, request, view=self)
         serializer = ReviewSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
@@ -51,6 +51,6 @@ class ReviewMovieView(APIView, CustomPagination):
         serializer = ReviewSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save(movie=movie_id, critic = request.user)
+        serializer.save(movie_id=movie_id, critic = request.user)
         return Response(serializer.data,status=status.HTTP_201_CREATED)
                    

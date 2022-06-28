@@ -15,17 +15,16 @@ class UserView(APIView, CustomPagination):
     permission_classes = [MyCustomPermission]
 
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
-
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         try:
+            user_already_exists = User.objects.get(email=request.data["email"])
+            if user_already_exists:
+                return Response({"email": ["email already exists"]}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            serializer = UserSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except KeyError:
-            return Response({"email": ["email already exists"]}, status=status.HTTP_400_BAD_REQUEST)
-    
+        
     
     def get(self, request):    
         # apenas admin

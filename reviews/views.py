@@ -47,7 +47,9 @@ class ReviewMovieView(APIView, CustomPagination):
         return self.get_paginated_response(serializer.data)
 
     def post(self, request, movie_id):
-        get_object_or_404(Movie, pk=movie_id)        
+        get_object_or_404(Movie, pk=movie_id)  
+        if request.data["stars"]>10 or request.data["stars"]<1:
+            return Response({"stars": ["Ensure this value is greater than or equal to 1."]})      
         serializer = ReviewSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
